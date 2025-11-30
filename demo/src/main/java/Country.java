@@ -1,20 +1,15 @@
 public class Country {
   private String country;
   private String description;
-  private String initialFactors;
   private int population;
+  private Factor[] factors;
 
-  public Country(String country, String description, String initialFactors, int population) {
+  public Country(String country, String description, int population, Factor[] factors) {
     this.country = country;
     this.description = description;
-    this.initialFactors = initialFactors;
     this.population = population;
+    this.factors = factors;
   }    
-
-  @Override
-  public String toString() {
-    return "\n" + country + ": " + description + initialFactors + "Starting Population: " + population; 
-  }
 
   public String getCountry() {
     return this.country;
@@ -31,20 +26,32 @@ public class Country {
   public void setDescription(String description) {
     this.description = description;
   }
-    
-  public String getInitialFactors() {
-    return this.initialFactors;
-  }
-    
-  public void setInitialFactors(String initialFactors) {
-    this.initialFactors = initialFactors;
-  }
 
   public int getPopulation() {
     return this.population;
   }
 
-  public void setPopulation(int population) {
-    this.population = population;
+  public void setPopulation(int newPopulation) {
+    this.population = newPopulation;
+  }
+
+  public Factor[] getFactors() {
+    return factors;
+  }
+
+  public Factor getFactorByName(String name) {
+    for (Factor f : factors) {
+      if (f.getName().equalsIgnoreCase(name)) return f;
+    }
+    return null;
+  }
+
+  @Override
+  public String toString() {
+    String s = "\n" + "Country: " + country + "\n" + description + "\n" + "Starting Population: " + population; 
+
+    for (Factor f : factors) s += " - " + f + "\n";
+    
+    return s;
   }
 }

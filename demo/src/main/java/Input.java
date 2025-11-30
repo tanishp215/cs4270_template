@@ -64,7 +64,7 @@ public class Input extends Application{
         Application.launch(args);
         // if Wakanda 
         // PopulationChanges WakandaBirthRate = new PopulationChanges("Wakanda", "Birth Rate", 1_000_000, 1.00);
-        // PopulationChanges WakandaDeathRate = new PopulationChanges("Wakanda", "Death Rate", 600_000, 1.00);
+        // PopulationChanges WakandaDeathRate = new PopulationChanges("Wakanda", "Death Rate", -600_000, 1.00);
         // PopulationChanges WakandaHealthCare = new PopulationChanges("Wakanda", "Health Care", 0, 1.04);
         // PopulationChanges WakandaFoodSupply = new PopulationChanges("Wakanda", "Food Supply", 0, 1.03);
         // PopulationChanges WakandaDisease = new PopulationChanges("Wakanda", "Disease", 0, 1.03);
@@ -77,7 +77,7 @@ public class Input extends Application{
 
         // if Asgard 
         // PopulationChanges AsgardBirthRate = new PopulationChanges("Asgard", "Birth Rate", 300_000, 1.00);
-        // PopulationChanges AsgardDeathRate = new PopulationChanges("Asgard", "Death Rate", 350_000, 1.00);
+        // PopulationChanges AsgardDeathRate = new PopulationChanges("Asgard", "Death Rate", -350_000, 1.00);
         // PopulationChanges AsgardHealthCare = new PopulationChanges("Asgard", "Health Care", 0, 1.00);
         // PopulationChanges AsgardFoodSupply = new PopulationChanges("Asgard", "Food Supply", 0, 1.02);
         // PopulationChanges AsgardDisease = new PopulationChanges("Asgard", "Disease", 0, 1.00);
@@ -90,7 +90,7 @@ public class Input extends Application{
 
         // if Atlantis 
         // PopulationChanges AtlantisBirthRate = new PopulationChanges("Atlantis", "Birth Rate", 800_000, 1.00);
-        // PopulationChanges AtlantisDeathRate = new PopulationChanges("Atlantis", "Death Rate", 700_000, 1.00);
+        // PopulationChanges AtlantisDeathRate = new PopulationChanges("Atlantis", "Death Rate", -700_000, 1.00);
         // PopulationChanges AtlantisHealthCare = new PopulationChanges("Atlantis", "Health Care", 0, 1.01);
         // PopulationChanges AtlantisFoodSupply = new PopulationChanges("Atlantis", "Food Supply", 0, 1.04);
         // PopulationChanges AtlantisDisease = new PopulationChanges("Atlantis", "Disease", 0, 1.01);
@@ -103,7 +103,7 @@ public class Input extends Application{
 
         // if Oz 
         // PopulationChanges OzBirthRate = new PopulationChanges("Oz", "Birth Rate", 50_000, 1.00);
-        // PopulationChanges OzDeathRate = new PopulationChanges("Oz", "Death Rate", 40_000, 1.00);
+        // PopulationChanges OzDeathRate = new PopulationChanges("Oz", "Death Rate", -40_000, 1.00);
         // PopulationChanges OzHealthCare = new PopulationChanges("Oz", "Health Care", 0, 1.01);
         // PopulationChanges OzFoodSupply = new PopulationChanges("Oz", "Food Supply", 0, 1.02);
         // PopulationChanges OzDisease = new PopulationChanges("Oz", "Disease", 0, 0.97);
@@ -116,7 +116,7 @@ public class Input extends Application{
 
         // if Narnia 
         // PopulationChanges NarniaBirthRate = new PopulationChanges("Narnia", "Birth Rate", 3_000_000, 1.00);
-        // PopulationChanges NarniaDeathRate = new PopulationChanges("Narnia", "Death Rate", 2_500_000, 1.00);
+        // PopulationChanges NarniaDeathRate = new PopulationChanges("Narnia", "Death Rate", -2_500_000, 1.00);
         // PopulationChanges NarniaHealthCare = new PopulationChanges("Narnia", "Health Care", 0, 1.04);
         // PopulationChanges NarniaFoodSupply = new PopulationChanges("Narnia", "Food Supply", 0, 0.99);
         // PopulationChanges NarniaDisease = new PopulationChanges("Narnia", "Disease", 0, 1.01);
