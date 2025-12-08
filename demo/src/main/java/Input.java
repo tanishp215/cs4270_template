@@ -275,7 +275,7 @@ public class Input extends Application{
         updatePieChart(country);
 
         timeline = new Timeline(
-            new KeyFrame(Duration.millis(700), ignore -> {
+            new KeyFrame(Duration.millis(1500), ignore -> {
                 int newPop = Simulation.simulateYear(country);
                 year[0]++;
 
