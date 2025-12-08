@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -14,122 +15,286 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.PieChart;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.util.Duration;
+import javafx.scene.control.Slider;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+
+import java.security.Key;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Input extends Application{
+
+    private LineChart<Number, Number> lineChart;
+    private PieChart pieChart;
+    private ChoiceBox<String> choiceBox;
+    private Country[] countries;
+    private Timeline timeline;
+    private VBox factorList;
+    private Label countryLabel;
+    private Label livePop;
+    private Country chosenCountry;
+    
+
     @Override
     public void start(Stage stage){
-        Button button = new Button();
-        button.setText("hello!");
-        Text text = new Text(300, 500, "Hello World!");
-        text.setFont(new Font(50));
 
-        ChoiceBox<String> choiceBox = new ChoiceBox<>();
+        countries = Data.getCountries();
+        
+        final NumberAxis xAxis = new NumberAxis();
+        xAxis.setLabel("Year");
 
-        choiceBox.getItems().add("Wakanda");
-        choiceBox.getItems().add("Asgard");
-        choiceBox.getItems().add("Atlantis");
-        choiceBox.getItems().add("Oz");
-        choiceBox.getItems().add("Narnia");
-        choiceBox.setPrefWidth(200); 
-        choiceBox.setPrefHeight(40);
-        choiceBox.setValue("Choose a country to begin with! ");
+        final NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Population");
 
-        HBox hbox = new HBox(20, text, button, choiceBox);
-        hbox.setAlignment(Pos.CENTER);
+        lineChart = new LineChart<>(xAxis, yAxis);
+        lineChart.setTitle("Population Over Time");
 
-        ObservableList<PieChart.Data> pieData =
-                FXCollections.observableArrayList(
-                        new PieChart.Data("Factor 1", 40),
-                        new PieChart.Data("Factor 2", 25),
-                        new PieChart.Data("Factor 3", 20),
-                        new PieChart.Data("Factor 4", 15)
-                );
+        pieChart = new PieChart();
+        pieChart.setTitle("Individual Factor Impact");
 
-        PieChart pieChart = new PieChart(pieData);
-        pieChart.setTitle("Market Share");
-        BorderPane chart = new BorderPane();
-        VBox vbox = new VBox(hbox);
-        vbox.setAlignment(Pos.TOP_CENTER);
-        chart.setTop(vbox);
-        chart.setCenter(pieChart);
+        choiceBox = new ChoiceBox<>();
+        for (Country c : countries){
+            choiceBox.getItems().add(c.getCountry());
+        }
+        choiceBox.getSelectionModel().selectFirst();
 
-        Scene scene = new Scene(chart, 1920, 1120);
-        stage.setTitle("Hello!");
+        choiceBox.setOnAction(ignore -> {
+            int index = choiceBox.getSelectionModel().getSelectedIndex();
+            if(index <0) {
+                return;
+            }
+
+            Country[] newCountries = Data.getCountries();
+            chosenCountry = newCountries[index];
+            updateCountryHeader(chosenCountry);
+            useFactorSliders(chosenCountry);
+            updatePieChart(chosenCountry);
+            lineChart.getData().clear();
+        });
+
+        chosenCountry = countries[choiceBox.getSelectionModel().getSelectedIndex()];
+        countryLabel = new Label();
+        livePop = new Label();
+        updateCountryHeader(chosenCountry);
+
+        Button simulate = new Button("Run the simulation");
+        simulate.setOnAction(ignore -> {
+            int index = choiceBox.getSelectionModel().getSelectedIndex();
+            if (index<0){
+                return;
+            }
+            
+            Country[] newCountries = Data.getCountries();
+            Country selectedCountry = newCountries[index];
+            runSimandCharts(selectedCountry);
+        });
+
+        Button liveSimulation = new Button("Start the live simulation");
+        liveSimulation.setOnAction(ignore -> {
+            int index = choiceBox.getSelectionModel().getSelectedIndex();
+            if (index<0){
+                return;
+            }
+
+            Country[] newCountries = Data.getCountries();
+            chosenCountry = newCountries[index];
+            updateCountryHeader(chosenCountry);
+            useFactorSliders(chosenCountry);
+            liveSim(chosenCountry);
+
+        });
+
+        Button stopSim = new Button("Stop simulation");
+        stopSim.setOnAction(ignore -> {
+            if (timeline!= null){
+                timeline.stop();
+                timeline = null;
+            }
+
+            int index = choiceBox.getSelectionModel().getSelectedIndex();
+            if (index < 0) {
+                return;
+            }
+
+            Country[] newCountries = Data.getCountries();
+            chosenCountry = newCountries[index];
+            lineChart.getData().clear();
+            updateCountryHeader(chosenCountry);
+            updatePieChart(chosenCountry);
+            useFactorSliders(chosenCountry);
+
+        });
+
+        HBox controls = new HBox(10, choiceBox, simulate, liveSimulation, stopSim);
+        controls.setAlignment(Pos.CENTER);
+        controls.setPadding(new Insets(10));
+
+        HBox status = new HBox(20, countryLabel, livePop);
+        status.setAlignment(Pos.CENTER_LEFT);
+        status.setPadding(new Insets(5,10,10,10));
+
+        VBox top = new VBox(controls, status);
+
+        factorList = new VBox(10);
+        factorList.setPadding(new Insets(10));
+        ScrollPane scrollFactor = new ScrollPane(factorList);
+        scrollFactor.setFitToWidth(true);
+        scrollFactor.setPrefWidth(320);
+
+        BorderPane root = new BorderPane();
+        root.setTop(top);
+        root.setCenter(lineChart);
+        root.setRight(pieChart);
+        root.setLeft(scrollFactor);
+        BorderPane.setMargin(pieChart, new Insets(10));
+
+        Scene scene = new Scene(root, 1200, 700);
+        stage.setTitle("Population Growth Sim");
         stage.setScene(scene);
+        useFactorSliders(chosenCountry);
         stage.show();
+
     }
+
+    private void runSimandCharts(Country country){
+        lineChart.getData().clear();
+
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        series.setName(country.getCountry());
+
+        int years = 20;
+        int currentPop = country.getPopulation();
+        series.getData().add(new XYChart.Data<>(0, currentPop));
+
+        for(int year = 1; year <= years; year++){
+            currentPop = Simulation.simulateYear(country);
+            series.getData().add(new XYChart.Data<>(year, currentPop));
+        }
+
+        lineChart.getData().add(series);
+
+        updatePieChart(country);    
+    }
+
+    private void updatePieChart(Country country){
+        Factor[] factors = country.getFactors();
+        ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList();
+
+        for(Factor f : factors){        
+            int value = Math.abs(f.getPopulationAdd());
+            double multiplier = Math.abs((f.getMultiplier() - 1.0) * country.getPopulation());
+            double total = value + multiplier;
+            if(total > 0){
+                pieData.add(new PieChart.Data(f.getName(), total));
+            }
+        }
+
+        pieChart.setData(pieData);
+    }
+
+    private void updateCountryHeader(Country country){
+        if (countryLabel != null) {
+            countryLabel.setText("Country: " + country.getCountry());
+        }
+        if (livePop != null){
+            livePop.setText("Population: " + country.getPopulation());
+        }
+    }
+
+    private void useFactorSliders(Country country){
+        if (factorList == null){
+            return;
+        }
+
+        factorList.getChildren().clear();
+        Label title = new Label("Factors for " + country.getCountry());
+        title.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+        factorList.getChildren().add(title);
+
+        Factor[] factors = country.getFactors();
+
+        for (Factor f : factors) {
+            Label labelName = new Label(f.getName());
+            labelName.setPrefWidth(180);
+
+            Slider newSlider = new Slider(-2_000_000, 2_000_000, f.getPopulationAdd());
+            newSlider.setShowTickMarks(true);
+            newSlider.setShowTickLabels(true);
+            newSlider.setMajorTickUnit(1_000_000);
+            newSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+                f.setPopulationAdd(newVal.intValue());
+            });
+            newSlider.setOnMouseReleased(ignore -> updatePieChart(country));
+
+            Slider multiplierSlider = new Slider(0.5, 1.5, f.getMultiplier());
+            multiplierSlider.setShowTickMarks(true);
+            multiplierSlider.setShowTickLabels(true);
+            multiplierSlider.setMajorTickUnit(0.25);
+             multiplierSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+                f.setMultiplier(newVal.doubleValue());
+            });
+            newSlider.setOnMouseReleased(ignore -> updatePieChart(country));
+
+
+            VBox sliders = new VBox(
+                new Label("Add: "), newSlider,
+                new Label("Multiplier"), multiplierSlider
+            );
+            sliders.setSpacing(3);
+
+            HBox row = new HBox(10, labelName, sliders);
+            row.setAlignment(Pos.CENTER_LEFT);
+
+            factorList.getChildren().add(row);
+        }
+    }
+
+    private void liveSim(Country country){
+        if(timeline != null){
+            timeline.stop();
+        }
+
+        lineChart.getData().clear();
+
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        series.setName(country.getCountry());
+        lineChart.getData().add(series);
+
+        final int[] year = {0};
+        int startingPop = country.getPopulation();
+        series.getData().add(new XYChart.Data<>(year[0], startingPop));
+        updateCountryHeader(country);
+        updatePieChart(country);
+
+        timeline = new Timeline(
+            new KeyFrame(Duration.millis(700), ignore -> {
+                int newPop = Simulation.simulateYear(country);
+                year[0]++;
+
+                series.getData().add(new XYChart.Data<>(year[0], newPop));
+                livePop.setText("Population: " + newPop);
+                updatePieChart(country);
+            })
+        );
+
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+    }
+
+
+
+    
 
     public static void main(String[] args) {
         Application.launch(args);
-        // if Wakanda 
-        // PopulationChanges WakandaBirthRate = new PopulationChanges("Wakanda", "Birth Rate", 1_000_000, 1.00);
-        // PopulationChanges WakandaDeathRate = new PopulationChanges("Wakanda", "Death Rate", -600_000, 1.00);
-        // PopulationChanges WakandaHealthCare = new PopulationChanges("Wakanda", "Health Care", 0, 1.04);
-        // PopulationChanges WakandaFoodSupply = new PopulationChanges("Wakanda", "Food Supply", 0, 1.03);
-        // PopulationChanges WakandaDisease = new PopulationChanges("Wakanda", "Disease", 0, 1.03);
-        // PopulationChanges WakandaInfantMortalityRate = new PopulationChanges("Wakanda", "Infant Mortality Rate", -2_500, 1.00);
-        // PopulationChanges WakandaEconomy = new PopulationChanges("Wakanda", "Economy", 0, 1.05);
-        // PopulationChanges WakandaEducation = new PopulationChanges("Wakanda", "Education", 0, 1.03);
-        // PopulationChanges WakandaBirthControl = new PopulationChanges("Wakanda", "Birth Control", 0, 0.96);
-        // PopulationChanges WakandaImmigration = new PopulationChanges("Wakanda", "Immigration", 0, 1.00);
-        // PopulationChanges[] WakandaChanges = {WakandaBirthRate, WakandaDeathRate, WakandaHealthCare, WakandaFoodSupply, WakandaDisease, WakandaInfantMortalityRate, WakandaEconomy, WakandaEducation, WakandaBirthControl, WakandaImmigration};
-
-        // if Asgard 
-        // PopulationChanges AsgardBirthRate = new PopulationChanges("Asgard", "Birth Rate", 300_000, 1.00);
-        // PopulationChanges AsgardDeathRate = new PopulationChanges("Asgard", "Death Rate", -350_000, 1.00);
-        // PopulationChanges AsgardHealthCare = new PopulationChanges("Asgard", "Health Care", 0, 1.00);
-        // PopulationChanges AsgardFoodSupply = new PopulationChanges("Asgard", "Food Supply", 0, 1.02);
-        // PopulationChanges AsgardDisease = new PopulationChanges("Asgard", "Disease", 0, 1.00);
-        // PopulationChanges AsgardInfantMortalityRate = new PopulationChanges("Asgard", "Infant Mortality Rate", -5_000, 1.00);
-        // PopulationChanges AsgardEconomy = new PopulationChanges("Asgard", "Economy", 0, 0.97);
-        // PopulationChanges AsgardEducation = new PopulationChanges("Asgard", "Education", 0, 0.99);
-        // PopulationChanges AsgardBirthControl = new PopulationChanges("Asgard", "Birth Control", 0, 1.00);
-        // PopulationChanges AsgardImmigration = new PopulationChanges("Asgard", "Immigration", 50_000, 1.00);
-        // PopulationChanges[] AsgardChanges = {AsgardBirthRate, AsgardDeathRate, AsgardHealthCare, AsgardFoodSupply, AsgardDisease, AsgardInfantMortalityRate, AsgardEconomy, AsgardEducation, AsgardBirthControl, AsgardImmigration};
-
-        // if Atlantis 
-        // PopulationChanges AtlantisBirthRate = new PopulationChanges("Atlantis", "Birth Rate", 800_000, 1.00);
-        // PopulationChanges AtlantisDeathRate = new PopulationChanges("Atlantis", "Death Rate", -700_000, 1.00);
-        // PopulationChanges AtlantisHealthCare = new PopulationChanges("Atlantis", "Health Care", 0, 1.01);
-        // PopulationChanges AtlantisFoodSupply = new PopulationChanges("Atlantis", "Food Supply", 0, 1.04);
-        // PopulationChanges AtlantisDisease = new PopulationChanges("Atlantis", "Disease", 0, 1.01);
-        // PopulationChanges AtlantisInfantMortalityRate = new PopulationChanges("Atlantis", "Infant Mortality Rate", -4_000, 1.00);
-        // PopulationChanges AtlantisEconomy = new PopulationChanges("Atlantis", "Economy", 0, 1.05);
-        // PopulationChanges AtlantisEducation = new PopulationChanges("Atlantis", "Education", 0, 1.01);
-        // PopulationChanges AtlantisBirthControl = new PopulationChanges("Atlantis", "Birth Control", 0, 0.97);
-        // PopulationChanges AtlantisImmigration = new PopulationChanges("Atlantis", "Immigration", 150_000, 1.00);
-        // PopulationChanges[] AtlantisChanges = {AtlantisBirthRate, AtlantisDeathRate, AtlantisHealthCare, AtlantisFoodSupply, AtlantisDisease, AtlantisInfantMortalityRate, AtlantisEconomy, AtlantisEducation, AtlantisBirthControl, AtlantisImmigration};
-
-        // if Oz 
-        // PopulationChanges OzBirthRate = new PopulationChanges("Oz", "Birth Rate", 50_000, 1.00);
-        // PopulationChanges OzDeathRate = new PopulationChanges("Oz", "Death Rate", -40_000, 1.00);
-        // PopulationChanges OzHealthCare = new PopulationChanges("Oz", "Health Care", 0, 1.01);
-        // PopulationChanges OzFoodSupply = new PopulationChanges("Oz", "Food Supply", 0, 1.02);
-        // PopulationChanges OzDisease = new PopulationChanges("Oz", "Disease", 0, 0.97);
-        // PopulationChanges OzInfantMortalityRate = new PopulationChanges("Oz", "Infant Mortality Rate", -500, 1.00);
-        // PopulationChanges OzEconomy = new PopulationChanges("Oz", "Economy", 0, 1.00);
-        // PopulationChanges OzEducation = new PopulationChanges("Oz", "Education", 0, 1.05);
-        // PopulationChanges OzBirthControl = new PopulationChanges("Oz", "Birth Control", 0, 0.98);
-        // PopulationChanges OzImmigration = new PopulationChanges("Oz", "Immigration", 10_000, 1.00);
-        // PopulationChanges[] OzChanges = {OzBirthRate, OzDeathRate, OzHealthCare, OzFoodSupply, OzDisease, OzInfantMortalityRate, OzEconomy, OzEducation, OzBirthControl, OzImmigration};
-
-        // if Narnia 
-        // PopulationChanges NarniaBirthRate = new PopulationChanges("Narnia", "Birth Rate", 3_000_000, 1.00);
-        // PopulationChanges NarniaDeathRate = new PopulationChanges("Narnia", "Death Rate", -2_500_000, 1.00);
-        // PopulationChanges NarniaHealthCare = new PopulationChanges("Narnia", "Health Care", 0, 1.04);
-        // PopulationChanges NarniaFoodSupply = new PopulationChanges("Narnia", "Food Supply", 0, 0.99);
-        // PopulationChanges NarniaDisease = new PopulationChanges("Narnia", "Disease", 0, 1.01);
-        // PopulationChanges NarniaInfantMortalityRate = new PopulationChanges("Narnia", "Infant Mortality Rate", -10_000, 1.00);
-        // PopulationChanges NarniaEconomy = new PopulationChanges("Narnia", "Economy", 0, 1.05);
-        // PopulationChanges NarniaEducation = new PopulationChanges("Narnia", "Education", 0, 1.02);
-        // PopulationChanges NarniaBirthControl = new PopulationChanges("Narnia", "Birth Control", 0, 0.99);
-        // PopulationChanges NarniaImmigration = new PopulationChanges("Narnia", "Immigration", 250_000, 1.00);
-        // PopulationChanges[] NarniaChanges = {NarniaBirthRate, NarniaDeathRate, NarniaHealthCare, NarniaFoodSupply, NarniaDisease, NarniaInfantMortalityRate, NarniaEconomy, NarniaEducation, NarniaBirthControl, NarniaImmigration};
-
-        // country, name, population add, population rate
-        // birth rate, death rate, health care access, food supply, disease, infant mortality rate, economy, education, birth control and immigration. 
-
     }
 }
-
+    

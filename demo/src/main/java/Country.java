@@ -48,7 +48,7 @@ public class Country {
 
   @Override
   public String toString() {
-    String s = "\n" + "Country: " + country + "\n" + description + "\n" + "Starting Population: " + population; 
+    String s = "Country: " + country + "\n" + description + "\n" + "Starting Population: " + population; 
 
     for (Factor f : factors) s += " - " + f + "\n";
     
