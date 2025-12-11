@@ -3,9 +3,9 @@ First, the screen will display a list of sliders that allow the user to change t
 The user chooses from a dropdown that gives an option to choose from 5 countries
 Theh user can click a button to run a simulation based on the initial values of the factors for 20 years
 The user can also click a button to run a live simulation and stop whenever the user feels like it and change the factors as the population changes. 
-To the right is a pie chart showing which factors are impacting the population the most.
+To the right is a pie chart showing which factors are impacting the population the most. We considered doing a leaderboard first but liked the idea of using a more visual representation of the leaderboard so we used a pie chart.
 In the center is a population vs time graph.
 In the top there is also a number showing the exact population at the given time.
 There is also a map of the country which will have dots that increase or decrease in size as the population changes. 
 These were all things that we included in our project proposal.
-The only things the user has to interact with is choosing the country, choosing eitheir the 20 year simulation or a live simulation, and changing the values of the factor sliders. They click run from the input class.
+The only things the user has to interact with is choosing the country, choosing eitheir the 20 year simulation or a live simulation, and changing the values of the factor sliders. They click run from the input class. The user must be in full screen for the simulation to properly run for some reason.
