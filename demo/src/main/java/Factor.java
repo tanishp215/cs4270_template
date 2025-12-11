@@ -1,12 +1,18 @@
+// each factor has its name, a populationAdd or multiplier, if it uses add then the multiplier is just 1.00, if it uses 
+// multiplier then the add is just 0, and a type, either a add or mult so the sliders later on only allow the user to
+// change either the add or multiplier
+
 public class Factor {
   private String name;
   private int populationAdd;
   private double multiplier;
+  private String type;
 
-  public Factor(String name, int populationAdd, double multiplier) {
+  public Factor(String name, int populationAdd, double multiplier, String type) {
     this.name = name;
     this.populationAdd = populationAdd;
     this.multiplier = multiplier;
+    this.type = type;
   }    
 
   public String getName() {
@@ -31,6 +37,14 @@ public class Factor {
     
   public void setMultiplier(double multiplier) {
     this.multiplier = multiplier;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  public String getType() {
+    return this.type;
   }
 
   @Override

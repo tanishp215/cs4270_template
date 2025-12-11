@@ -1,3 +1,5 @@
+// each country will have its name, a description, a population value, and a list of factors that impact the population
+
 public class Country {
   private String country;
   private String description;
