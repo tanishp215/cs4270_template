@@ -8,4 +8,4 @@ In the center is a population vs time graph.
 In the top there is also a number showing the exact population at the given time.
 There is also a map of the country which will have dots that increase or decrease in size as the population changes. 
 These were all things that we included in our project proposal.
-The only things the user has to interact with is choosing the country, choosing eitheir the 20 year simulation or a live simulation, and changing the values of the factor sliders. They click run from the input class. The user must be in full screen for the simulation to properly run for some reason.
+The only things the user has to interact with is choosing the country, choosing eitheir the 20 year simulation or a live simulation, and changing the values of the factor sliders. They click run from the input class. 
